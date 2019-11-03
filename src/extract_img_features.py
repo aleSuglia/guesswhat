@@ -38,7 +38,7 @@ def extract_features(
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver = tf.train.Saver()
         saver.restore(sess, network_ckpt)
-        img_list = listdir(os.path.join(image_dir, split))
+        img_list = listdir(image_dir)
 
         print("Load dataset -> set: {}".format(split))
 
@@ -55,10 +55,9 @@ def extract_features(
             idx2img = f.create_dataset('idx2img', shape=[no_images], dtype=np.int32)
 
             for i in tqdm(range(len(img_list))):
-                image_filepath = os.path.join(image_dir, split, img_list[i])
+                image_filepath = os.path.join(image_dir, img_list[i])
                 image_tensor = Image.open(image_filepath).convert('RGB')
-
-                feat = sess.run(ft_output, feed_dict={images_placeholder: image_tensor})
+                feat = sess.run(ft_output, feed_dict={images_placeholder: np.expand_dims(image_tensor, 0)})
 
                 # Store dataset
                 ft_dataset[i] = feat
@@ -76,11 +75,18 @@ def main(args):
     print('Start')
     splits = get_splits(args.image_dir)
     img_size = 224
-    images_placeholder = tf.placeholder(tf.float32, [None, img_size, img_size, 3], name='image')
 
-    _, end_points = vgg.vgg_16(images_placeholder, is_training=False, dropout_keep_prob=1.0)
-    ft_name = os.path.join("vgg_16", args.feature_name)
+    # TF graph creation
+    images_placeholder = tf.placeholder(tf.float32, [None, img_size, img_size, 3], name='image')
+    proc_image_op = tf.image.resize_image_with_crop_or_pad(
+        images_placeholder,
+        target_height=224,
+        target_width=224
+    )
+    _, end_points = vgg.vgg_16(proc_image_op, is_training=False, dropout_keep_prob=1.0)
+    ft_name = os.path.join("vgg_16", "fc8")
     ft_output = end_points[ft_name]
+    ####
 
     for split in splits:
         extract_features(
