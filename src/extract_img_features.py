@@ -75,7 +75,8 @@ def main(args):
     start = time()
     print('Start')
     splits = get_splits(args.image_dir)
-    images_placeholder = tf.placeholder(tf.float32, [None, args.img_size, args.img_size, 3], name='image')
+    img_size = 224
+    images_placeholder = tf.placeholder(tf.float32, [None, img_size, img_size, 3], name='image')
 
     _, end_points = vgg.vgg_16(images_placeholder, is_training=False, dropout_keep_prob=1.0)
     ft_name = os.path.join("vgg_16", args.feature_name)
