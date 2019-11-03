@@ -35,10 +35,7 @@ if __name__ == '__main__':
     parser.add_argument("-oracle_identifier", type=str, required=True , help='Oracle identifier')  # Use checkpoint id instead?
     parser.add_argument("-qgen_identifier", type=str, required=True, help='Qgen identifier')
     parser.add_argument("-guesser_identifier", type=str, required=True, help='Guesser identifier')
-
-    parser.add_argument("-continue_exp", type=bool, default=True, help="Continue previously started experiment?")
-    #parser.add_argument("-from_checkpoint", type=str, help="Start from checkpoint?")
-    parser.add_argument("-skip_training",  type=lambda x: bool(strtobool(x)), default="False", help="Start from checkpoint?")
+    parser.add_argument("-load_rl", type=bool, default=True, help="Load RL model weights")
     parser.add_argument("-evaluate_all", type=lambda x: bool(strtobool(x)), default="False", help="Evaluate sampling, greedy and BeamSearch?")  #TODO use an input list
     parser.add_argument("-store_games", type=lambda x: bool(strtobool(x)), default="True", help="Should we dump the game at evaluation times")
 
