@@ -8,7 +8,8 @@ import h5py
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim.python.slim.nets.vgg as vgg
-from PIL import Image
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 from tqdm import tqdm
 
 parser = ArgumentParser()
@@ -52,7 +53,7 @@ def extract_features(
         with h5py.File(filepath, 'w') as f:
             ft_shape = [int(dim) for dim in ft_output.get_shape()[1:]]
             ft_dataset = f.create_dataset('features', shape=[no_images] + ft_shape, dtype=np.float32)
-            idx2img = f.create_dataset('idx2img', shape=[no_images], dtype=np.int32)
+            idx2img = f.create_dataset('idx2img', shape=[no_images], dtype=h5py.special_dtype(vlen=str))
 
             for i in tqdm(range(len(img_list))):
                 image_filepath = os.path.join(image_dir, img_list[i])
@@ -62,11 +63,10 @@ def extract_features(
                 # Store dataset
                 ft_dataset[i] = feat
 
-                image_id = img_list[:img_list.index(".")]
+                image_id = img_list[i][:img_list[i].index(".")]
                 idx2img[i] = image_id
 
-                print("Start dumping file: {}".format(filepath))
-            print("Finished dumping file: {}".format(filepath))
+        print("Finished dumping file: {}".format(filepath))
 
     print("Done!")
 

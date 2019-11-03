@@ -22,15 +22,6 @@ from guesswhat.models.qgen.qgen_wrapper import QGenWrapper
 from guesswhat.train.utils import test_model, compute_qgen_accuracy
 
 
-def get_splits(data_dir):
-    dirs = [name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
-
-    if not dirs:
-        return ['train', 'valid', 'test']
-
-    return dirs
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser('Question generator (policy gradient baseline))')
@@ -129,7 +120,7 @@ if __name__ == '__main__':
         #############################
 
         sess.run(tf.global_variables_initializer())
-        if args.continue_exp:  # TODO only reload qgen ckpt
+        if args.load_rl:  # TODO only reload qgen ckpt
             # use RL model for evaluation
             qgen_saver.restore(sess, save_path.format('params.ckpt'))
         else:
@@ -170,7 +161,7 @@ if __name__ == '__main__':
         # Compute the initial scores
         logger.info(">>>-------------- INITIAL SCORE ---------------------<<<")
 
-        for split in get_splits(args.data_dir):
+        for split in ["nd_test", "nd_valid", "od_test", "od_valid"]:
             logger.info("Loading dataset split {}".format(split))
             testset = Dataset(args.data_dir, split, "guesswhat_nocaps", image_builder, crop_builder)
 
