@@ -144,8 +144,8 @@ class Object:
 
 class Dataset(AbstractDataset):
     """Loads the dataset."""
-    def __init__(self, folder, which_set, image_builder=None, crop_builder=None):
-        file = '{}/guesswhat.{}.jsonl.gz'.format(folder, which_set)
+    def __init__(self, folder, which_set, dataset_name="guesswhat", image_builder=None, crop_builder=None):
+        file = '{}/{}.{}.jsonl.gz'.format(folder, dataset_name, which_set)
         games = []
 
         self.set = which_set
