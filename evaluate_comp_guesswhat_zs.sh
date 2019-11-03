@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # evaluate the supervised learning baseline
-python src/evaluate_gameplay.py
+python src/evaluate_gameplay.py \
     -data_dir data/comp_guesswhat_zs/ \
     -exp_dir /scratch/ale_models/guesswhat_devries/out/loop/ \
     -config config/looper/config.json \
@@ -15,7 +15,7 @@ python src/evaluate_gameplay.py
     -no_thread 2;
 
 # evaluate the RL optimised model
-python src/evaluate_gameplay.py
+python src/evaluate_gameplay.py \
     -data_dir data/comp_guesswhat_zs/ \
     -exp_dir /scratch/ale_models/guesswhat_devries/out/loop/ \
     -config config/looper/config.json \
