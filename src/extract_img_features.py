@@ -62,7 +62,8 @@ def extract_features(
                 # Store dataset
                 ft_dataset[i] = feat
 
-                idx2img[i] = img_list[i]
+                image_id = img_list[:img_list.index(".")]
+                idx2img[i] = image_id
 
                 print("Start dumping file: {}".format(filepath))
             print("Finished dumping file: {}".format(filepath))
