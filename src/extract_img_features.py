@@ -77,7 +77,7 @@ def main(args):
     img_size = 224
 
     # TF graph creation
-    images_placeholder = tf.placeholder(tf.float32, [None, img_size, img_size, 3], name='image')
+    images_placeholder = tf.placeholder(tf.float32, [None, None, None, 3], name='image')
     proc_image_op = tf.image.resize_image_with_crop_or_pad(
         images_placeholder,
         target_height=224,
