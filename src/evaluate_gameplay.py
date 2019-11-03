@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     # Load image
     logger.info('Loading images..')
-    image_builder = get_img_builder(qgen_config['model']['image'], args.img_dir)
+    image_builder = get_img_builder(qgen_config['model']['image'], args.img_dir, custom_features=True)
 
     crop_builder = None
     if oracle_config['inputs'].get('crop', False):
