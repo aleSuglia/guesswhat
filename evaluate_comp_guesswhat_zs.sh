@@ -25,5 +25,6 @@ python src/evaluate_gameplay.py
     -qgen_identifier 867d59b933a89f4525b189da9d67f17b \
     -guesser_identifier e2c11b1757337d7969dc223c334756a9 \
     -evaluate_all true \
+    -load_rl true \
     -store_games true \
     -no_thread 2;
