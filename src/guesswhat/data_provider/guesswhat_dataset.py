@@ -47,9 +47,15 @@ class Game:
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
 
-        self.question_ids = [qa['id'] for qa in qas]
-        self.questions = [qa['question'] for qa in qas]
-        self.answers = [qa['answer'] for qa in qas]
+        if qas is not None:
+            self.question_ids = [qa['id'] for qa in qas]
+            self.questions = [qa['question'] for qa in qas]
+            self.answers = [qa['answer'] for qa in qas]
+        else:
+            self.question_ids = []
+            self.questions = []
+            self.answers = []
+
         self.status = status
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
@@ -158,7 +164,7 @@ class Dataset(AbstractDataset):
                 g = Game(id=game['id'],
                          object_id=game['object_id'],
                          objects=game['objects'],
-                         qas=game['qas'],
+                         qas=game['qas'] if 'qas' in game else None,
                          image=game['image'],
                          status=game['status'],
                          which_set=which_set,
