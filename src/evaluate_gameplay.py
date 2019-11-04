@@ -165,11 +165,6 @@ if __name__ == '__main__':
             logger.info("Loading dataset split {}".format(split))
             testset = Dataset(args.data_dir, split, "guesswhat_nocaps", image_builder, crop_builder)
 
-            logger.info(">>>  Initial models  <<<")
-            test_model(sess, testset, cpu_pool=cpu_pool, tokenizer=tokenizer,
-                       oracle=oracle_network, guesser=guesser_network, qgen=qgen_network,
-                       batch_size=batch_size * 2, logger=logger)
-
             logger.info(">>>  New Games  <<<")
             compute_qgen_accuracy(sess, testset, batchifier=eval_batchifier, evaluator=looper_evaluator,
                                   tokenizer=tokenizer,
