@@ -19,8 +19,7 @@ from guesswhat.models.oracle.oracle_network import OracleNetwork
 from guesswhat.models.oracle.oracle_wrapper import OracleWrapper
 from guesswhat.models.qgen.qgen_lstm_network import QGenNetworkLSTM
 from guesswhat.models.qgen.qgen_wrapper import QGenWrapper
-from guesswhat.train.utils import test_model, compute_qgen_accuracy
-
+from guesswhat.train.utils import compute_qgen_accuracy
 
 if __name__ == '__main__':
 
@@ -122,16 +121,24 @@ if __name__ == '__main__':
         sess.run(tf.global_variables_initializer())
         if args.load_rl:  # TODO only reload qgen ckpt
             # use RL model for evaluation
-            qgen_saver.restore(sess, save_path.format('params.ckpt'))
+            rl_model_path = os.path.join(args.exp_dir, args.qgen_identifier, 'params.ckpt')
+            print("Loading RL model")
+            qgen_saver.restore(sess, rl_model_path)
         else:
             # use SL qgen model for evaluation
             qgen_var_supervized = [v for v in tf.global_variables() if "qgen" in v.name and 'rl_baseline' not in v.name]
             qgen_loader_supervized = tf.train.Saver(var_list=qgen_var_supervized)
-            qgen_loader_supervized.restore(sess,
-                                           os.path.join(args.networks_dir, 'qgen', args.qgen_identifier, 'params.ckpt'))
+            qgen_sl_model_path = os.path.join(args.networks_dir, 'qgen', args.qgen_identifier, 'params.ckpt')
+            print("Loading qgen SL model: {}".format(qgen_sl_model_path))
+            qgen_loader_supervized.restore(sess, qgen_sl_model_path)
 
-        oracle_saver.restore(sess, os.path.join(args.networks_dir, 'oracle', args.oracle_identifier, 'params.ckpt'))
-        guesser_saver.restore(sess, os.path.join(args.networks_dir, 'guesser', args.guesser_identifier, 'params.ckpt'))
+        oracle_model_path = os.path.join(args.networks_dir, 'oracle', args.oracle_identifier, 'params.ckpt')
+        print("Loading oracle model: {}".format(oracle_model_path))
+        oracle_saver.restore(sess, oracle_model_path)
+
+        guesser_model_path = os.path.join(args.networks_dir, 'guesser', args.guesser_identifier, 'params.ckpt')
+        print("Loading guesser model: {}".format(guesser_model_path))
+        guesser_saver.restore(sess, guesser_model_path)
 
         # create training tools
         loop_sources = qgen_network.get_sources(sess)
