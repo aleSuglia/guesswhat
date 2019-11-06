@@ -37,7 +37,7 @@ if __name__ == '__main__':
                         help='Oracle identifier')  # Use checkpoint id instead?
     parser.add_argument("-qgen_identifier", type=str, required=True, help='Qgen identifier')
     parser.add_argument("-guesser_identifier", type=str, required=True, help='Guesser identifier')
-    parser.add_argument("-load_rl", type=bool, default=False, help="Load RL model weights")
+    parser.add_argument("-rl_identifier", type=str, default=None, help="Load RL model weights")
     parser.add_argument("-evaluate_all", type=lambda x: bool(strtobool(x)), default="False",
                         help="Evaluate sampling, greedy and BeamSearch?")  # TODO use an input list
     parser.add_argument("-store_games", type=lambda x: bool(strtobool(x)), default="True",
@@ -119,9 +119,9 @@ if __name__ == '__main__':
         #############################
 
         sess.run(tf.global_variables_initializer())
-        if args.load_rl:  # TODO only reload qgen ckpt
+        if args.rl_identifier:  # TODO only reload qgen ckpt
             # use RL model for evaluation
-            rl_model_path = os.path.join(args.exp_dir, args.qgen_identifier, 'params.ckpt')
+            rl_model_path = os.path.join(args.exp_dir, args.rl_identifier, 'params.ckpt')
             print("Loading RL model")
             qgen_saver.restore(sess, rl_model_path)
         else:
