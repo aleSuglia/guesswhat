@@ -173,7 +173,7 @@ if __name__ == '__main__':
             testset = Dataset(args.data_dir, split, "guesswhat_nocaps", image_builder, crop_builder)
 
             logger.info(">>>  New Games  <<<")
-            dump_suffix = "gameplay_{}_{}".format(split, "rl" if args.load_rl else "sl")
+            dump_suffix = "gameplay_{}_{}".format(split, "rl" if args.rl_identifier else "sl")
             compute_qgen_accuracy(sess, testset, batchifier=eval_batchifier, evaluator=looper_evaluator,
                                   tokenizer=tokenizer,
                                   mode=mode_to_evaluate, save_path=save_path, cpu_pool=cpu_pool, batch_size=batch_size,
