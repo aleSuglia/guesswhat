@@ -20,7 +20,6 @@ from guesswhat.models.guesser.guesser_network import GuesserNetwork
 
 def save_dialogue_states(output_path, split_name, dialogue_state_features, dialogue_state_ids):
     output_file = os.path.join(output_path, "{}_dialogue_states".format(split_name))
-
     print("Saving dialogue state features for split {} to file {}".format(split_name, output_file))
     np.savez(output_file, features=dialogue_state_features, dialogue2id=dialogue_state_ids)
 
@@ -32,7 +31,7 @@ if __name__ == '__main__':
     #############################
 
     parser = argparse.ArgumentParser('Guesser network baseline!')
-
+    parser.add_argument("-features", type=str, help="Output directory that will contain the output features")
     parser.add_argument("-data_dir", type=str, help="Directory with data")
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
     parser.add_argument("-img_dir", type=str, help='Directory with images')
@@ -63,9 +62,9 @@ if __name__ == '__main__':
 
     # Load data
     logger.info('Loading data..')
-    trainset = Dataset(args.data_dir, "train", image_builder, crop_builder)
-    validset = Dataset(args.data_dir, "valid", image_builder, crop_builder)
-    testset = Dataset(args.data_dir, "test", image_builder, crop_builder)
+    trainset = Dataset(args.data_dir, "train", "guesswhat", image_builder, crop_builder)
+    validset = Dataset(args.data_dir, "valid", "guesswhat", image_builder, crop_builder)
+    testset = Dataset(args.data_dir, "test", "guesswhat", image_builder, crop_builder)
 
     # Load dictionary
     logger.info('Loading dictionary..')
@@ -107,9 +106,8 @@ if __name__ == '__main__':
         sess.run(tf.global_variables_initializer())
         saver.restore(sess, save_path.format('params.ckpt'))
 
-        best_val_err = 0
-        best_train_err = None
-
+        if not os.path.exists(args.features):
+            os.makedirs(args.features)
         # create training tools
         evaluator = Evaluator(sources, network.scope_name, network=network, tokenizer=tokenizer)
         batchifier = QuestionerBatchifier(tokenizer, sources, status=('success',))
@@ -118,23 +116,23 @@ if __name__ == '__main__':
                                   batch_size=batch_size * 2, pool=cpu_pool,
                                   batchifier=batchifier,
                                   shuffle=False)
-        train_states = evaluator.process(sess, train_iterator, outputs=outputs)
+        _, train_states = evaluator.process(sess, train_iterator, outputs=outputs, output_dialogue_states=True)
 
-        save_dialogue_states(args.output_path, "test", *train_states)
+        save_dialogue_states(args.features, "train", *train_states)
 
         valid_iterator = Iterator(validset, pool=cpu_pool,
                                   batch_size=batch_size * 2,
                                   batchifier=batchifier,
                                   shuffle=False)
-        valid_states = evaluator.process(sess, valid_iterator, outputs=outputs)
+        _, valid_states = evaluator.process(sess, valid_iterator, outputs=outputs, output_dialogue_states=True)
 
-        save_dialogue_states(args.output_path, "test", *valid_states)
+        save_dialogue_states(args.features, "valid", *valid_states)
 
         # Load early stopping
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size * 2,
                                  batchifier=batchifier,
                                  shuffle=False)
-        test_states = evaluator.process(sess, test_iterator, outputs)
+        _, test_states = evaluator.process(sess, test_iterator, outputs, output_dialogue_states=True)
 
-        save_dialogue_states(args.output_path, "test", *test_states)
+        save_dialogue_states(args.features, "test", *test_states)
