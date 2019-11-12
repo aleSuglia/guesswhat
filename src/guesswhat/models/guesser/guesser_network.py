@@ -58,6 +58,9 @@ class GuesserNetwork(AbstractNetwork):
                                                num_hidden=config['num_lstm_units'],
                                                seq_length=self.seq_length)
 
+            # we will use this to extract the features for the dialogue
+            self.last_states = last_states
+
             last_states = tf.reshape(last_states, [-1, config['num_lstm_units'], 1])
             scores = tf.matmul(obj_embs, last_states)
             scores = tf.reshape(scores, [-1, tf.shape(self.obj_cats)[1]])
