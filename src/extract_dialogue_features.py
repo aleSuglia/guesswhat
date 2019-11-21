@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-from distutils.util import strtobool
 from multiprocessing import Pool
 
 import numpy as np
@@ -36,12 +35,13 @@ if __name__ == '__main__':
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
     parser.add_argument("-img_dir", type=str, help='Directory with images')
     parser.add_argument("-config", type=str, help="Configuration file")
+    parser.add_argument("-exp_identifier", type=str, help="Experiment identifier")
     parser.add_argument("-dict_file", type=str, default="dict.json", help="Dictionary file name")
     parser.add_argument("-gpu_ratio", type=float, default=1., help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=1, help="No thread to load batch")
 
     args = parser.parse_args()
-    config, exp_identifier, save_path = load_config(args.config, args.exp_dir)
+    config, exp_identifier, save_path = load_config(args.config, args.exp_dir, args.exp_identifier)
     logger = logging.getLogger()
 
     ###############################

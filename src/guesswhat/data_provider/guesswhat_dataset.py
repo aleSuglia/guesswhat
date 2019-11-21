@@ -24,7 +24,8 @@ class Game:
     def __init__(self, id, object_id, image, objects, qas, status, which_set, image_builder, crop_builder):
         self.dialogue_id = id
         self.object_id = object_id
-        image_id = image["file_name"][:image["file_name"].index(".")]
+        # Trick to be able to load both NOCAPS and MSCOCO images
+        image_id = image["file_name"][:image["file_name"].index(".")] if not image["file_name"].startswith("COCO") else image["id"]
         self.image = Image(id=image_id,
                            width=image["width"],
                            height=image["height"],
