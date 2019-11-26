@@ -5,6 +5,7 @@ from multiprocessing import Pool
 
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 
 from generic.data_provider.image_loader import get_img_builder
 from generic.data_provider.iterator import Iterator
@@ -18,9 +19,15 @@ from guesswhat.models.guesser.guesser_network import GuesserNetwork
 
 
 def save_dialogue_states(output_path, split_name, dialogue_state_features, dialogue_state_ids):
-    output_file = os.path.join(output_path, "{}_dialogue_states".format(split_name))
-    print("Saving dialogue state features for split {} to file {}".format(split_name, output_file))
-    np.savez(output_file, features=dialogue_state_features, dialogue2id=dialogue_state_ids)
+    split_output_path = os.path.join(output_path, split_name)
+    if not os.path.exists(split_output_path):
+        os.makedirs(split_output_path)
+
+    print("Saving dialogue state features for split {}".format(split_name))
+    for i, dialogue_id in enumerate(tqdm(dialogue_state_ids)):
+        output_file = os.path.join(split_output_path, "{}.npy".format(dialogue_id))
+
+        np.save(output_file, dialogue_state_features[i])
 
 
 if __name__ == '__main__':
