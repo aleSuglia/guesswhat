@@ -1,17 +1,17 @@
+import copy
 import gzip
 import json
-import copy
 import os
 
-from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
-
+from PIL import ImageDraw
 
 from generic.data_provider.dataset import AbstractDataset
 
 # TODO find a cleaner way!
 try:
     import cocoapi.PythonAPI.pycocotools.mask as cocoapi
+
     use_coco = True
 except ImportError:
     print("Coco API was not detected - advanced segmentation features cannot be used")
@@ -25,7 +25,8 @@ class Game:
         self.dialogue_id = id
         self.object_id = object_id
         # Trick to be able to load both NOCAPS and MSCOCO images
-        image_id = image["file_name"][:image["file_name"].index(".")] if not image["file_name"].startswith("COCO") else image["id"]
+        image_id = image["file_name"][:image["file_name"].index(".")] if not image["file_name"].startswith("COCO") else \
+        image["id"]
         self.image = Image(id=image_id,
                            width=image["width"],
                            height=image["height"],
@@ -61,22 +62,18 @@ class Game:
         self.status = status
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
-            image_path = os.path.join(img_raw_dir, self.image.filename)
+        image_path = os.path.join(img_raw_dir, self.image.filename)
 
-            img = PImage.open(image_path)
-            draw = ImageDraw.Draw(img)
+        img = PImage.open(image_path)
+        draw = ImageDraw.Draw(img)
 
-            for i, obj in enumerate(self.objects):
-                if display_index:
-                    draw.text((obj.bbox.x_center, self.image.height-obj.bbox.y_center), str(i))
-                if display_mask:
-                    print("Show mask: Not yet implemented... sry")
+        for i, obj in enumerate(self.objects):
+            if display_index:
+                draw.text((obj.bbox.x_center, self.image.height - obj.bbox.y_center), str(i))
+            if display_mask:
+                print("Show mask: Not yet implemented... sry")
 
-            img.show()
-
-
-
-
+        img.show()
 
 
 class Image:
@@ -97,6 +94,7 @@ class Image:
         else:
             return None
 
+
 class Bbox:
     def __init__(self, bbox, im_width, im_height):
         # Retrieve features (COCO format)
@@ -109,13 +107,13 @@ class Bbox:
         self.y_upper = im_height - bbox[1]
         self.y_lower = self.y_upper - self.y_height
 
-        self.x_center = self.x_left + 0.5*self.x_width
-        self.y_center = self.y_lower + 0.5*self.y_height
+        self.x_center = self.x_left + 0.5 * self.x_width
+        self.y_center = self.y_lower + 0.5 * self.y_height
 
         self.coco_bbox = bbox
 
     def __str__(self):
-        return "center : {0:5.2f}/{1:5.2f} - size: {2:5.2f}/{3:5.2f}"\
+        return "center : {0:5.2f}/{1:5.2f} - size: {2:5.2f}/{3:5.2f}" \
             .format(self.x_center, self.y_center, self.x_width, self.y_height)
 
 
@@ -127,7 +125,7 @@ class Object:
         self.bbox = bbox
         self.area = area
         self.segment = segment
- 
+
         # https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/mask.py
         # self.rle_mask = None
         # if use_coco:
@@ -148,10 +146,9 @@ class Object:
         return self.crop_loader.get_image(**kwargs)
 
 
-
-
 class Dataset(AbstractDataset):
     """Loads the dataset."""
+
     def __init__(self, folder, which_set, dataset_name="guesswhat", image_builder=None, crop_builder=None):
         file = '{}/{}.{}.jsonl.gz'.format(folder, dataset_name, which_set)
         games = []
@@ -175,7 +172,7 @@ class Dataset(AbstractDataset):
 
                 games.append(g)
 
-                #if len(games) > 200: break
+                # if len(games) > 200: break
 
         super(Dataset, self).__init__(games)
 
@@ -184,6 +181,7 @@ class OracleDataset(AbstractDataset):
     """
     Each game contains a single question answer pair
     """
+
     def __init__(self, dataset):
         old_games = dataset.get_data()
         new_games = []
@@ -210,6 +208,7 @@ class CropDataset(AbstractDataset):
     """
     Each game contains no question/answers but a new object
     """
+
     def __init__(self, dataset):
         old_games = dataset.get_data()
         new_games = []
@@ -240,7 +239,6 @@ class CropDataset(AbstractDataset):
 
 
 def dump_samples_into_dataset(data, save_path, tokenizer, name="model"):
-
     with gzip.open(save_path.format('guesswhat.' + name + '.jsonl.gz'), 'wb') as f:
         for id_game, d in enumerate(data):
             dialogue = d["dialogue"]
@@ -253,20 +251,21 @@ def dump_samples_into_dataset(data, save_path, tokenizer, name="model"):
             sample = {}
 
             qas = []
-            start  = 1
+            start = 1
             for k, word in enumerate(dialogue):
                 if word == tokenizer.yes_token or \
-                                word == tokenizer.no_token or \
-                                word == tokenizer.non_applicable_token:
+                        word == tokenizer.no_token or \
+                        word == tokenizer.non_applicable_token:
                     q = tokenizer.decode(dialogue[start:k - 1])
                     a = tokenizer.decode([dialogue[k]])
 
-                    prob_obj = list(prob_objects[len(qas),:len(game.objects)])
-                    prob_obj = [str(round(p,3)) for p in prob_obj] # decimal are not supported y default in json encoder
+                    prob_obj = list(prob_objects[len(qas), :len(game.objects)])
+                    prob_obj = [str(round(p, 3)) for p in
+                                prob_obj]  # decimal are not supported y default in json encoder
 
                     qas.append({"question": q,
                                 "answer": a[1:-1],
-                                "id":0,
+                                "id": 0,
                                 "p": prob_obj})
 
                     start = k + 1
@@ -285,7 +284,7 @@ def dump_samples_into_dataset(data, save_path, tokenizer, name="model"):
                                   "category": o.category,
                                   "area": o.area,
                                   "bbox": o.bbox.coco_bbox,
-                                  "segment" : [], #no segment to avoid making the file to big
+                                  "segment": [],  # no segment to avoid making the file to big
                                   } for o in game.objects]
 
             sample["object_id"] = object_id
