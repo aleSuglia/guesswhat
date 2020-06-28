@@ -190,8 +190,8 @@ class OracleDataset(AbstractDataset):
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
-    def load(cls, folder, which_set, image_builder=None, crop_builder=None):
-        return cls(Dataset(folder, which_set, image_builder, crop_builder))
+    def load(cls, folder, which_set, dataset_name="guesswhat", image_builder=None, crop_builder=None):
+        return cls(Dataset(folder, which_set, dataset_name, image_builder, crop_builder))
 
     def split(self, game):
         games = []
@@ -217,8 +217,8 @@ class CropDataset(AbstractDataset):
         super(CropDataset, self).__init__(new_games)
 
     @classmethod
-    def load(cls, folder, which_set, image_builder=None, crop_builder=None):
-        return cls(Dataset(folder, which_set, image_builder, crop_builder))
+    def load(cls, folder, which_set, dataset_name="guesswhat", image_builder=None, crop_builder=None):
+        return cls(Dataset(folder, which_set, dataset_name, image_builder, crop_builder))
 
     def split(self, game):
         games = []
