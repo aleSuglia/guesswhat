@@ -57,19 +57,20 @@ def compute_qgen_accuracy(sess, dataset, batchifier, evaluator, mode, tokenizer,
     logger = logging.getLogger()
 
     for m in mode:
-        test_iterator = Iterator(dataset, pool=cpu_pool,
-                                 batch_size=batch_size,
-                                 batchifier=batchifier,
-                                 shuffle=False,
-                                 use_padding=True)
-        test_score = evaluator.process(sess, test_iterator, mode=m, store_games=store_games)
+        if m != "beam_search":
+            test_iterator = Iterator(dataset, pool=cpu_pool,
+                                     batch_size=batch_size,
+                                     batchifier=batchifier,
+                                     shuffle=False,
+                                     use_padding=True)
+            test_score = evaluator.process(sess, test_iterator, mode=m, store_games=store_games)
 
-        # Retrieve the generated games and dump them as a dataset
-        if store_games:
-            generated_dialogues = evaluator.get_storage()
-            dump_samples_into_dataset(generated_dialogues,
-                                      save_path=save_path,
-                                      tokenizer=tokenizer,
-                                      name=dump_suffix + "." + m)
+            # Retrieve the generated games and dump them as a dataset
+            if store_games:
+                generated_dialogues = evaluator.get_storage()
+                dump_samples_into_dataset(generated_dialogues,
+                                          save_path=save_path,
+                                          tokenizer=tokenizer,
+                                          name=dump_suffix + "." + m)
 
-        logger.info("Accuracy ({} - {}): {}".format(dataset.set, m, test_score))
+            logger.info("Accuracy ({} - {}): {}".format(dataset.set, m, test_score))
